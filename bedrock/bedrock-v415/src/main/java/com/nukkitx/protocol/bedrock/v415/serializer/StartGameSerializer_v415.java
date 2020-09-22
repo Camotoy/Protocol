@@ -44,6 +44,10 @@ public class StartGameSerializer_v415 implements BedrockPacketSerializer<StartGa
 
         helper.writeArray(buffer, packet.getItemEntries(), (buf, packetHelper, entry) -> {
             packetHelper.writeString(buf, entry.getIdentifier());
+            System.out.println(entry.getIdentifier());
+            if (entry.getIdentifier().equals("minecraft:shield")) {
+                helper.setBlockingItem(entry.getId());
+            }
             buf.writeShortLE(entry.getId());
         });
 
@@ -78,6 +82,9 @@ public class StartGameSerializer_v415 implements BedrockPacketSerializer<StartGa
         helper.readArray(buffer, packet.getItemEntries(), (buf, packetHelper) -> {
             String identifier = packetHelper.readString(buf);
             short id = buf.readShortLE();
+            if (identifier.equals("minecraft:shield")) {
+                helper.setBlockingItem(id);
+            }
             return new StartGamePacket.ItemEntry(identifier, id);
         });
 

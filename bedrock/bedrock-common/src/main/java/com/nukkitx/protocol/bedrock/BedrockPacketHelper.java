@@ -53,6 +53,8 @@ public abstract class BedrockPacketHelper {
     protected final Int2ObjectBiMap<CommandParamType> commandParams = new Int2ObjectBiMap<>();
     protected final Int2ObjectBiMap<ResourcePackType> resourcePackTypes = new Int2ObjectBiMap<>();
 
+    protected int shieldId = 513;
+
     protected BedrockPacketHelper() {
         gameRuleTypes.defaultReturnValue(-1);
 
@@ -617,6 +619,15 @@ public abstract class BedrockPacketHelper {
      */
     public boolean isBlockingItem(int id) {
         return false;
+    }
+
+    /**
+     * Set the item that has blockingticks attached.
+     * @param id the ID of the item to set
+     */
+    public void setBlockingItem(int id) {
+        System.out.println("Hello");
+        shieldId = id;
     }
 
     public void readExperiments(ByteBuf buffer, List<ExperimentData> experiments) {
