@@ -2,12 +2,14 @@ package com.nukkitx.protocol.bedrock.v407;
 
 import com.nukkitx.network.VarInts;
 import com.nukkitx.network.util.Preconditions;
+import com.nukkitx.protocol.bedrock.BedrockPacketHelper;
 import com.nukkitx.protocol.bedrock.data.LevelEventType;
 import com.nukkitx.protocol.bedrock.data.SoundEvent;
 import com.nukkitx.protocol.bedrock.data.entity.EntityData;
 import com.nukkitx.protocol.bedrock.data.entity.EntityFlag;
 import com.nukkitx.protocol.bedrock.data.entity.EntityLinkData;
 import com.nukkitx.protocol.bedrock.data.inventory.ItemData;
+import com.nukkitx.protocol.bedrock.packet.ItemStackResponsePacket;
 import com.nukkitx.protocol.bedrock.v390.BedrockPacketHelper_v390;
 import io.netty.buffer.ByteBuf;
 import lombok.AccessLevel;
@@ -160,5 +162,23 @@ public class BedrockPacketHelper_v407 extends BedrockPacketHelper_v390 {
     public void writeNetItem(ByteBuf buffer, ItemData item) {
         VarInts.writeInt(buffer, item.getNetId());
         this.writeItem(buffer, item);
+    }
+
+    @Override
+    public ItemStackResponsePacket.ItemEntry readItemEntry(ByteBuf buffer, BedrockPacketHelper helper) {
+        return new ItemStackResponsePacket.ItemEntry(
+                buffer.readByte(),
+                buffer.readByte(),
+                buffer.readByte(),
+                VarInts.readInt(buffer),
+                "");
+    }
+
+    @Override
+    public void writeItemEntry(ByteBuf buffer, BedrockPacketHelper helper, ItemStackResponsePacket.ItemEntry itemEntry) {
+        buffer.writeByte(itemEntry.getSlot());
+        buffer.writeByte(itemEntry.getHotbarSlot());
+        buffer.writeByte(itemEntry.getCount());
+        VarInts.writeInt(buffer, itemEntry.getStackNetworkId());
     }
 }
