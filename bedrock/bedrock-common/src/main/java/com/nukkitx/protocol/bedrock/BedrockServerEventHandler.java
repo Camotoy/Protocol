@@ -17,6 +17,8 @@ public interface BedrockServerEventHandler {
 
     void onSessionCreation(BedrockServerSession serverSession);
 
+    void onSubSessionCreation(BedrockSubClientServerSession serverSession);
+
     default void onUnhandledDatagram(ChannelHandlerContext ctx, DatagramPacket packet) {
     }
 }

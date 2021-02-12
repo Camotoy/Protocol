@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DefaultBatchHandler implements BatchHandler {
     private static final InternalLogger log = InternalLoggerFactory.getInstance(DefaultBatchHandler.class);
     public static final DefaultBatchHandler INSTANCE = new DefaultBatchHandler();

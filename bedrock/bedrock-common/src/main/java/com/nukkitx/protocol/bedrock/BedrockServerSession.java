@@ -4,14 +4,22 @@ import com.nukkitx.network.raknet.RakNetSession;
 import com.nukkitx.protocol.MinecraftServerSession;
 import com.nukkitx.protocol.bedrock.packet.DisconnectPacket;
 import com.nukkitx.protocol.bedrock.wrapper.BedrockWrapperSerializer;
+import com.nukkitx.protocol.bedrock.wrapper.BedrockWrapperSerializers;
 import io.netty.channel.EventLoop;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 
 public class BedrockServerSession extends BedrockSession implements MinecraftServerSession<BedrockPacket> {
+    @Getter
+    private final Int2ObjectMap<BedrockSession> subSessions;
 
     public BedrockServerSession(RakNetSession connection, EventLoop eventLoop, BedrockWrapperSerializer serializer) {
         super(connection, eventLoop, serializer);
+        this.subSessions = new Int2ObjectOpenHashMap<>();
+        this.subSessions.put(0, this);
     }
 
     @Override
@@ -33,5 +41,12 @@ public class BedrockServerSession extends BedrockSession implements MinecraftSer
         }
         packet.setKickMessage(reason);
         this.sendPacketImmediately(packet);
+    }
+
+    public BedrockSubClientServerSession createSubSession(int clientId, BedrockServer server) {
+        BedrockSubClientServerSession serverSession = new BedrockSubClientServerSession(clientId, (RakNetSession) this.connection, server.eventLoopGroup.next(),
+                BedrockWrapperSerializers.getSerializer(((RakNetSession) this.connection).getProtocolVersion()));
+        this.subSessions.put(clientId, serverSession);
+        return serverSession;
     }
 }
