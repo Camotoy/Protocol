@@ -1,6 +1,7 @@
 package com.nukkitx.protocol.bedrock.handler;
 
 import com.nukkitx.protocol.bedrock.*;
+import com.nukkitx.protocol.bedrock.packet.LoginPacket;
 import com.nukkitx.protocol.bedrock.packet.SubClientLoginPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
@@ -20,14 +21,17 @@ public class DefaultServerBatchHandler extends DefaultBatchHandler {
     @Override
     public void handle(BedrockSession session, ByteBuf compressed, Collection<BedrockPacket> packets) {
         for (BedrockPacket packet : packets) {
-            if (packet instanceof SubClientLoginPacket) {
+            if (packet instanceof LoginPacket) {
+                ((BedrockServerSession) session).setClientId(packet.getClientId());
+            } else if (packet instanceof SubClientLoginPacket) {
                 session = ((BedrockServerSession) session).createSubSession(packet.getClientId(), server);
                 server.getHandler().onSubSessionCreation((BedrockSubClientServerSession) session);
             } else {
                 session = ((BedrockServerSession) session).getSubSessions().get(packet.getClientId());
-                if (session.isLogging() && log.isTraceEnabled()) {
-                    log.trace("Inbound {}: {}", session.getAddress(), packet);
-                }
+            }
+
+            if (session.isLogging() && log.isTraceEnabled()) {
+                log.trace("Inbound {}: {}", session.getAddress(), packet);
             }
 
             BedrockPacketHandler handler = session.getPacketHandler();

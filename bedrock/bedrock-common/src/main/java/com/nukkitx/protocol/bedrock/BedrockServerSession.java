@@ -15,11 +15,11 @@ import javax.annotation.Nullable;
 public class BedrockServerSession extends BedrockSession implements MinecraftServerSession<BedrockPacket> {
     @Getter
     private final Int2ObjectMap<BedrockSession> subSessions;
+    protected int clientId;
 
     public BedrockServerSession(RakNetSession connection, EventLoop eventLoop, BedrockWrapperSerializer serializer) {
         super(connection, eventLoop, serializer);
         this.subSessions = new Int2ObjectOpenHashMap<>();
-        this.subSessions.put(0, this);
     }
 
     @Override
@@ -44,9 +44,14 @@ public class BedrockServerSession extends BedrockSession implements MinecraftSer
     }
 
     public BedrockSubClientServerSession createSubSession(int clientId, BedrockServer server) {
-        BedrockSubClientServerSession serverSession = new BedrockSubClientServerSession(clientId, (RakNetSession) this.connection, server.eventLoopGroup.next(),
+        BedrockSubClientServerSession serverSession = new BedrockSubClientServerSession(this, clientId, (RakNetSession) this.connection, server.eventLoopGroup.next(),
                 BedrockWrapperSerializers.getSerializer(((RakNetSession) this.connection).getProtocolVersion()));
         this.subSessions.put(clientId, serverSession);
         return serverSession;
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+        this.subSessions.put(clientId, this);
     }
 }

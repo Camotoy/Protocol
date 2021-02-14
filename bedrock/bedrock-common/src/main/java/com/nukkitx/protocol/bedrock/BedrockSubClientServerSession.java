@@ -1,28 +1,20 @@
 package com.nukkitx.protocol.bedrock;
 
 import com.nukkitx.network.raknet.RakNetSession;
-import com.nukkitx.protocol.MinecraftServerSession;
 import com.nukkitx.protocol.bedrock.packet.DisconnectPacket;
 import com.nukkitx.protocol.bedrock.wrapper.BedrockWrapperSerializer;
 import io.netty.channel.EventLoop;
 
 import javax.annotation.Nullable;
 
-public class BedrockSubClientServerSession extends BedrockSession implements MinecraftServerSession<BedrockPacket> {
+public class BedrockSubClientServerSession extends BedrockServerSession {
+    private final BedrockServerSession mainSession;
     private final int clientId;
 
-    BedrockSubClientServerSession(int clientId, RakNetSession connection, EventLoop eventLoop, BedrockWrapperSerializer serializer) {
+    BedrockSubClientServerSession(BedrockServerSession mainSession, int clientId, RakNetSession connection, EventLoop eventLoop, BedrockWrapperSerializer serializer) {
         super(connection, eventLoop, serializer);
+        this.mainSession = mainSession;
         this.clientId = clientId;
-    }
-
-    @Override
-    public void disconnect() {
-        this.disconnect(null, true);
-    }
-
-    public void disconnect(@Nullable String reason) {
-        this.disconnect(reason, false);
     }
 
     public void disconnect(@Nullable String reason, boolean hideReason) {
@@ -41,12 +33,17 @@ public class BedrockSubClientServerSession extends BedrockSession implements Min
     @Override
     public void sendPacket(BedrockPacket packet) {
         packet.setSenderId(clientId);
-        super.sendPacket(packet);
+
+        mainSession.sendPacket(packet);
     }
 
     @Override
     public void sendPacketImmediately(BedrockPacket packet) {
         packet.setSenderId(clientId);
-        super.sendPacketImmediately(packet);
+        mainSession.sendPacketImmediately(packet);
+    }
+
+    public BedrockServerSession getMainSession() {
+        return mainSession;
     }
 }
